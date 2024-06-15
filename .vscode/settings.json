@@ -1,0 +1,6 @@
+{
+    "cpplint.cpplintPath": "/home/vscode/.local/bin/cpplint",
+    "cpplint.filters": [
+        "-legal/copyright",
+    ],
+}
