@@ -10,6 +10,10 @@ dist/main: $(SOURCES)
 run: dist/main
 	./dist/main
 
+.PHONY: check-leaks
+check-leaks: dist/main
+	valgrind --leak-check=full --leak-resolution=high --show-reachable=yes ./dist/main
+
 .PHONY: clean
 clean:
 	rm dist/main
