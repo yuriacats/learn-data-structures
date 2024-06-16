@@ -1,4 +1,5 @@
 SOURCES = $(shell find src -name "*.c")
+SHELL = /bin/bash
 
 .PHONY: default
 default: run
