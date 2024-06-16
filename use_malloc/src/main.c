@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+#include <stdlib.h>
 /*
 要件
 1. ユーザーに標準入力で任意の数字(a)を書き込ませる
@@ -19,11 +19,11 @@ int main() {
     printf("Please enter number %d:", i + 1);
     scanf("%d", &num_list[i]);
   }
-  printf("You entered reverse:");
-  for (int i = 0; i < N; i++) {
-    printf("%d", num_list[N - i]);
-    print("\n");
+  printf("You entered reverse:[");
+  for (int i = N - 1; i >= 0; i--) {
+    printf(" %d,", num_list[i]);
   }
+  printf("]\n");
   free(num_list);
   return 0;
 }
