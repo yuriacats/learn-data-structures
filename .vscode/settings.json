@@ -1,6 +1,9 @@
 {
-    "cpplint.cpplintPath": "/home/vscode/.local/bin/cpplint",
-    "cpplint.filters": [
-        "-legal/copyright",
-    ],
+  "cpplint.cpplintPath": "/home/vscode/.local/bin/cpplint",
+  "cpplint.filters": [
+    "-legal/copyright",
+  ],
+  "github.copilot.enable": {
+    "*": false,
+  }
 }
