@@ -1,11 +1,11 @@
-SOURCES = $(shell find src -name "*.c")
-SHELL = /bin/bash
+SHELL= /bin/bash
+SOURCES = $(shell find src -name "*.cpp")
 
 .PHONY: default
 default: run
 
 dist/main: $(SOURCES)
-	gcc $(SOURCES) -o dist/main
+	g++ $(SOURCES) -o dist/main
 
 .PHONY: run
 run: dist/main
@@ -18,6 +18,10 @@ check-leaks: dist/main
 .PHONY: time
 time: dist/main
 	time ./dist/main
+
+.PHONY: test-performance
+test-performance: dist/main
+	./test-performance.sh
 
 .PHONY: clean
 clean:
