@@ -14,10 +14,10 @@ int main() {
   }
   for (int i=0; i<max_i;i++){
     for (int j=0; j<max_j;j++){
-      #sum += array[j*max_i+i];
-      ## 平均25秒ほど実行にかかる 
+      // sum += array[j*max_i+i];
+      // 平均25秒ほど実行にかかる 
       sum += array[i*max_j+j];
-      ## 平均5秒ほど実行にかかる 
+      // 平均5秒ほど実行にかかる 
     }
   }
 
