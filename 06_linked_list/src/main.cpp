@@ -10,6 +10,7 @@ struct int_linked_list_node {
     this->data = data;
     next_node = nullptr;
   }
+  ~int_linked_list_node() {delete next_node;}
 };
 
 struct int_linked_list{
@@ -29,6 +30,7 @@ struct int_linked_list{
       last_node=node;
     }
   }
+  ~int_linked_list() {delete first_node;}
 };
 
 
@@ -50,5 +52,6 @@ void print_int_linked_list(int_linked_list* list){
 int main() {
   int_linked_list* test = new int_linked_list(std::vector<int>{1,2,3,4});
   print_int_linked_list(test);
+  delete test;
   return 0;
 }
