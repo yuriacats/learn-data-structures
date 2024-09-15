@@ -4,7 +4,7 @@
 #include <vector>
 #define DEFAULT_N 100
 
-long long int readN() {
+int64_t readN() {
   char *envN = getenv("N");
   if (envN) {
     return atoll(envN);
@@ -16,7 +16,7 @@ long long int readN() {
 struct int_linked_list_node {
   int_linked_list_node *next_node;
   int data;
-  int_linked_list_node(int data) {
+  explicit int_linked_list_node(int64_t data) {
     this->data = data;
     next_node = nullptr;
   }
@@ -24,10 +24,10 @@ struct int_linked_list_node {
 };
 
 struct int_linked_list {
-  int length;
+  int64_t length;
   int_linked_list_node *first_node;
   int_linked_list_node *last_node;
-  int_linked_list(std::vector<int> data) {
+  explicit int_linked_list(std::vector<int64_t> data) {
     this->length = data.size();
     if (data.size() == 0) {
       this->first_node = nullptr;
@@ -42,10 +42,16 @@ struct int_linked_list {
     }
   }
   ~int_linked_list() { delete first_node; }
-  void firstappend(int data) { first_node = new int_linked_list_node(data); }
+  void firstappend(int data) {
+    first_node = new int_linked_list_node(data);
+    last_node = first_node;
+    length = 1;
+  }
+
   void prepend(int data) {
-    if (this->first_node == nullptr) {
+    if (!(this->first_node)) {
       firstappend(data);
+      return;
     }
     int_linked_list_node *new_first_node = new int_linked_list_node(data);
     new_first_node->next_node = this->first_node;
@@ -55,6 +61,7 @@ struct int_linked_list {
   void append(int data) {
     if (this->first_node == nullptr) {
       firstappend(data);
+      return;
     }
     int_linked_list_node *new_last_node = new int_linked_list_node(data);
     this->last_node->next_node = new_last_node;
@@ -62,12 +69,13 @@ struct int_linked_list {
     length++;
   }
   void delete_last() {
-    int_linked_list_node *last_node = first_node;
-    while (last_node->next_node->next_node != nullptr) {
-      last_node = last_node->next_node;
+    int_linked_list_node *target_node = first_node;
+    while (target_node->next_node != last_node) {
+      target_node = target_node->next_node;
     }
-    delete last_node->next_node;
-    last_node->next_node = nullptr;
+    delete last_node;
+    target_node->next_node = nullptr;
+    last_node = target_node;
     length--;
   }
   void delete_first() {
@@ -81,15 +89,8 @@ struct int_linked_list {
 
 void print_int_linked_list(int_linked_list *list) {
   int_linked_list_node *l = list->first_node;
-  if (l == nullptr) {
-    printf("\n");
-    return;
-  }
-  while (true) {
+  while (l) {
     printf("%d, ", l->data);
-    if (l->next_node == nullptr) {
-      break;
-    }
     l = l->next_node;
   }
   printf("\n");
@@ -101,31 +102,31 @@ void print_int_linked_list(std::vector<int> *list) {
   printf("\n");
 }
 void linked_list_prepend_test_function() {
-  long long int N = readN();
-  int_linked_list *test = new int_linked_list(std::vector<int>{});
+  int64_t N = readN();
+  int_linked_list *test = new int_linked_list(std::vector<int64_t>{});
   // print_int_linked_list(test);
-  for (long long int i = 0; i < N; i++) {
+  for (int64_t i = 0; i < N; i++) {
     test->prepend(i);
   }
   // print_int_linked_list(test);
   delete test;
 }
 void linked_list_append_test_function() {
-  long long int N = readN();
-  int_linked_list *test = new int_linked_list(std::vector<int>{});
+  int64_t N = readN();
+  int_linked_list *test = new int_linked_list(std::vector<int64_t>{});
   // print_int_linked_list(test);
-  for (long long int i = 0; i < N; i++) {
+  for (int64_t i = 0; i < N; i++) {
     test->append(i);
   }
-  // print_int_linked_list(test);
+  print_int_linked_list(test);
   delete test;
 }
 
 void vector_prepend_test_function() {
-  long long int N = readN();
-  std::vector<long long int> *test = new std::vector<long long int>{};
-  for (long long int i = 0; i < N; i++) {
-    std::vector<long long int> *new_vector = new std::vector<long long int>{i};
+  int64_t N = readN();
+  std::vector<int64_t> *test = new std::vector<int64_t>{};
+  for (int64_t i = 0; i < N; i++) {
+    std::vector<int64_t> *new_vector = new std::vector<int64_t>{i};
     for (int it = 0; it < test->size(); it++) {
       new_vector->push_back((*test)[it]);
     }
@@ -136,9 +137,9 @@ void vector_prepend_test_function() {
 }
 
 int main() {
-  vector_prepend_test_function();
-  //  linked_list_prepend_test_function();
-  // linked_list_append_test_function();
+  // vector_prepend_test_function();
+  //   linked_list_prepend_test_function();
+  linked_list_append_test_function();
 
   return 0;
 }
