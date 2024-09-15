@@ -74,7 +74,7 @@ N               (t/(n*n))
 
 ### 末尾挿入時(linked_list)の長さと実行時間の関係
 
-実験してみたところO(n^2)である。
+実験してみたところO(n^2)である。末尾挿入１回あたりO(n)かかるということである
 ```
 vscode ➜ /workspaces/learn-data-structures/06_linked_list (main) $ make test-performance EXPR="t/(n*n)"
 ./test-performance.sh
