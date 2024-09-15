@@ -26,6 +26,7 @@ struct int_linked_list_node {
 struct int_linked_list {
   int length;
   int_linked_list_node *first_node;
+  int_linked_list_node *last_node;
   int_linked_list(std::vector<int> data) {
     this->length = data.size();
     if (data.size() == 0) {
@@ -33,7 +34,7 @@ struct int_linked_list {
       return;
     }
     this->first_node = new int_linked_list_node(data[0]);
-    int_linked_list_node *last_node = this->first_node;
+    last_node = this->first_node;
     for (int i = 1; i < data.size(); i++) {
       int_linked_list_node *node = new int_linked_list_node(data[i]);
       last_node->next_node = node;
@@ -52,16 +53,12 @@ struct int_linked_list {
     length++;
   }
   void append(int data) {
-    // 計算量がn^2くらいになっている
     if (this->first_node == nullptr) {
       firstappend(data);
     }
     int_linked_list_node *new_last_node = new int_linked_list_node(data);
-    int_linked_list_node *last_node = first_node;
-    while (last_node->next_node != nullptr) {
-      last_node = last_node->next_node;
-    }
-    last_node->next_node = new_last_node;
+    this->last_node->next_node = new_last_node;
+    this->last_node = new_last_node;
     length++;
   }
   void delete_last() {
@@ -123,32 +120,25 @@ void linked_list_append_test_function() {
   // print_int_linked_list(test);
   delete test;
 }
+
 void vector_prepend_test_function() {
   long long int N = readN();
   std::vector<long long int> *test = new std::vector<long long int>{};
-  std::vector<long long int> *new_vector = nullptr;
-  new_vector = new std::vector<long long int>{0};
-  for (long long int it = 0; it < test->size(); it++) {
-    new_vector->push_back((*test)[it]);
-  }
-  delete test;
-  test = new_vector;
-  for (long long int i = 1; i < N; i++) {
-    std::vector<long long int> *pre_new_vector = new_vector;
-    new_vector = new std::vector<long long int>{i};
+  for (long long int i = 0; i < N; i++) {
+    std::vector<long long int> *new_vector = new std::vector<long long int>{i};
     for (int it = 0; it < test->size(); it++) {
       new_vector->push_back((*test)[it]);
     }
+    delete test;
     test = new_vector;
-    delete pre_new_vector;
   }
   delete test;
 }
 
 int main() {
-  // vector_prepend_test_function();
+  vector_prepend_test_function();
   //  linked_list_prepend_test_function();
-  linked_list_append_test_function();
+  // linked_list_append_test_function();
 
   return 0;
 }
