@@ -4,30 +4,35 @@
 #include <iostream>
 #include <vector>
 
+const int64_t ring_size = 5;
 struct ring_buffer_queue {
-  std::vector<int64_t> buf = {0, 0, 0, 0, 0};
-  int64_t now_first_point = 0;
-  int64_t max_point = 0;
-  int64_t ring_size = 5;
+  std::vector<int64_t> buf;
+  int64_t first_index = 0;
+  int64_t next_index = 0;
+  int64_t count = 0;
+
+  ring_buffer_queue() : buf(ring_size + 1, 0) {}
 
   void enqueue(int64_t data) { ring_push_back(data); }
   int64_t dequeue() {
-    if (buf.size() == 0) {
-      throw "error";
+    if (count == 0) {
+      throw "dequeu error ";
     }
-    if (now_first_point > ring_size - 1) {
-      now_first_point = 0;
-    }
-    int64_t first = buf[now_first_point];
-    now_first_point++;
+    int64_t first = buf[first_index];
+    first_index = (first_index + 1) % ring_size;
+    count--;
     return first;
   }
+
+ private:
   void ring_push_back(int64_t data) {
-    if (max_point > ring_size - 1) {
-      max_point = 0;
+    if (count == ring_size) {
+      throw "dequeu error ";
     }
-    buf[max_point] = data;
-    max_point++;
+
+    buf[next_index] = data;
+    next_index = (next_index + 1) % ring_size;
+    count++;
   }
 };
 
@@ -37,6 +42,10 @@ int main() {
   test_queue->enqueue(1);
   test_queue->enqueue(4);
   test_queue->enqueue(3);
+  std::cout << test_queue->dequeue() << std::endl;
+  test_queue->enqueue(5);
+  test_queue->enqueue(5);
+  test_queue->enqueue(5);
   std::cout << test_queue->dequeue() << std::endl;
   std::cout << test_queue->dequeue() << std::endl;
   std::cout << test_queue->dequeue() << std::endl;
