@@ -44,8 +44,6 @@ int main() {
   test_queue->enqueue(3);
   std::cout << test_queue->dequeue() << std::endl;
   test_queue->enqueue(5);
-  test_queue->enqueue(5);
-  test_queue->enqueue(5);
   std::cout << test_queue->dequeue() << std::endl;
   std::cout << test_queue->dequeue() << std::endl;
   std::cout << test_queue->dequeue() << std::endl;
