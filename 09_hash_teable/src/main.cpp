@@ -119,7 +119,20 @@ void repl() {
   }
 }
 
-void test_performance(int table_size, int data_size, int query_count) {
+template <typename F>
+double stopwatch(F &f) {
+  std::chrono::system_clock::time_point start, end;
+  start = std::chrono::system_clock::now();
+  f();
+  end = std::chrono::system_clock::now();
+  double elapsed =
+      std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+          .count();
+
+  return elapsed;
+}
+
+double test_performance(int table_size, int data_size, int query_count) {
   hash_table table(table_size);
 
   // initiate
@@ -132,19 +145,57 @@ void test_performance(int table_size, int data_size, int query_count) {
     table.insert(keys[i], i);
   }
 
-  // query
-  for (int i = 0; i < query_count; i++) {
-    int64_t key = keys[query_count % data_size];
+  const auto query = [query_count, keys, data_size, &table]() {
+    for (int i = 0; i < query_count; i++) {
+      int64_t key = keys[query_count % data_size];
 
-    table.get(key);
+      table.get(key);
+    }
+  };
+
+  return stopwatch(query);
+}
+
+struct test_set {
+  double usage_percentage;
+  int data_size;
+};
+
+struct test_result {
+  double usage_percentage;
+  double elapsed;
+};
+
+std::vector<test_result> multiple_test_performances(int table_size,
+                                                    int query_count) {
+  // table_size の 0.1 % 刻みで data_size を変化させて計測
+
+  std::vector<test_set> test_sets;
+  for (double usage_percentage = 0.001; usage_percentage < 1.0;
+       usage_percentage += 0.001) {
+    int data_size = (int)(table_size * usage_percentage);
+    test_sets.push_back({usage_percentage, data_size});
   }
+
+  std::vector<test_result> results;
+  for (auto test_set : test_sets) {
+    double elapsed =
+        test_performance(table_size, test_set.data_size, query_count);
+    results.push_back({test_set.usage_percentage, elapsed});
+  }
+
+  return results;
 }
 
 int main(int argc, char const *argv[]) {
   int table_size = atoi(argv[1]);
-  int data_size = atoi(argv[2]);
-  int query_count = atoi(argv[3]);
+  int query_count = atoi(argv[2]);
 
-  test_performance(table_size, data_size, query_count);
+  auto result = multiple_test_performances(table_size, query_count);
+
+  std::cout << "usage_percentage elapsed(ms)" << std::endl;
+  for (auto r : result) {
+    std::cout << r.usage_percentage << " " << r.elapsed << std::endl;
+  }
   return 0;
 }

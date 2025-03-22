@@ -5,7 +5,7 @@ SOURCES = $(shell find src -name "*.cpp")
 default: run
 
 dist/main: $(SOURCES)
-	g++ $(SOURCES) -o dist/main
+	g++ $(SOURCES) -std=c++20 -o dist/main
 
 .PHONY: run
 run: dist/main
