@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <iomanip>
 #include <iostream>
 #include <string>
 #include <tuple>
@@ -132,24 +133,13 @@ double stopwatch(F &f) {
   return elapsed;
 }
 
-double test_performance(int table_size, int data_size, int query_count) {
-  hash_table table(table_size);
-
-  // initiate
-  std::vector<int64_t> keys(data_size);
-  for (int i = 0; i < data_size; i++) {
-    keys[i] = rand();
-  }
-
-  for (int i = 0; i < data_size; i++) {
-    table.insert(keys[i], i);
-  }
-
-  const auto query = [query_count, keys, data_size, &table]() {
+double test_performance(hash_table *table, std::vector<int64_t> *keys,
+                        int data_size, int query_count) {
+  const auto query = [query_count, keys, data_size, table]() {
     for (int i = 0; i < query_count; i++) {
-      int64_t key = keys[query_count % data_size];
+      int64_t key = (*keys)[query_count % data_size];
 
-      table.get(key);
+      table->get(key);
     }
   };
 
@@ -166,36 +156,44 @@ struct test_result {
   double elapsed;
 };
 
-std::vector<test_result> multiple_test_performances(int table_size,
-                                                    int query_count) {
+void multiple_test_performances(int table_size, int query_count) {
   // table_size の 0.1 % 刻みで data_size を変化させて計測
 
+  hash_table table(table_size);
+  int current_data_size = 0;
+
   std::vector<test_set> test_sets;
-  for (double usage_percentage = 0.001; usage_percentage < 1.0;
-       usage_percentage += 0.001) {
+  for (int i = 1; i < 1000; i++) {
+    double usage_percentage = i / 1000.0;
     int data_size = (int)(table_size * usage_percentage);
     test_sets.push_back({usage_percentage, data_size});
   }
 
-  std::vector<test_result> results;
-  for (auto test_set : test_sets) {
-    double elapsed =
-        test_performance(table_size, test_set.data_size, query_count);
-    results.push_back({test_set.usage_percentage, elapsed});
+  std::vector<int64_t> keys(query_count);
+  for (int i = 0; i < query_count; i++) {
+    keys[i] = arc4random();
   }
 
-  return results;
+  printf("usage elapsed table_size=%d query_count=%d\n", table_size,
+         query_count);
+  for (auto test_set : test_sets) {
+    for (; current_data_size < test_set.data_size; current_data_size++) {
+      table.insert(arc4random(), current_data_size);
+    }
+
+    double elapsed =
+        test_performance(&table, &keys, test_set.data_size, query_count);
+
+    printf("%4.1f%% %3.4f\n", test_set.usage_percentage * 100,
+           elapsed / 1000.0);
+  }
 }
 
 int main(int argc, char const *argv[]) {
   int table_size = atoi(argv[1]);
   int query_count = atoi(argv[2]);
 
-  auto result = multiple_test_performances(table_size, query_count);
+  multiple_test_performances(table_size, query_count);
 
-  std::cout << "usage_percentage elapsed(ms)" << std::endl;
-  for (auto r : result) {
-    std::cout << r.usage_percentage << " " << r.elapsed << std::endl;
-  }
   return 0;
 }
