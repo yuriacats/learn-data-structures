@@ -11,9 +11,9 @@ struct tree_node {
   tree_node *right_node;
 
   explicit tree_node(int64_t value, tree_node *left, tree_node *right) {
-    value = value;
-    left_node = left;
-    right_node = right;
+    this->value = value;
+    this->left_node = left;
+    this->right_node = right;
   }
 };
 
@@ -84,12 +84,16 @@ class tree {
       this_node = *next;
     }
   }
+  // ここもデバック用のプリントを残しているので最後に消す
   std::tuple<tree_node *, tree_node *> get_max_node(tree_node *target_tree) {
+    printf("max_node(first):%ld\n", target_tree->value);
     if (target_tree->right_node == nullptr) {
+      printf("max_node(tt):%ld\n", target_tree->value);
       return {target_tree, nullptr};
     }
     auto [res, next] = get_max_node(target_tree->right_node);
     if (res != nullptr && next == nullptr) {
+      printf("max_node(erro):%ld\n", res->value);
       return {res, target_tree};
     }
     return {res, next};
@@ -121,10 +125,24 @@ class tree {
     if (target->left_node == nullptr && target->right_node == nullptr) {
       delete target;
     }
-    auto [new_node, new_node_per] = get_max_node(target->left_node);
-    target->value = new_node->value;
-    new_node_per->left_node = new_node->left_node;
-    new_node_per->right_node = nullptr;
+    if (target->left_node != nullptr) {
+      // TODOこの辺りのケースの処理ができてないのでやる
+      auto [new_node, new_node_per] = get_max_node(target->left_node);
+      printf("max_node:%ld\n", new_node->value);
+      printf("max_node(check):%ld\n", new_node_per->right_node->value);
+      printf("test6\n");
+      target->value = new_node->value;
+
+      printf("test7\n");
+      if (new_node->left_node != nullptr) {
+        new_node_per->left_node = new_node->left_node;
+      }
+      printf("test8\n");
+      delete new_node;
+      printf("test9\n");
+      new_node_per->right_node = nullptr;
+      printf("test10\n");
+    }
   }
   void print_nodes() { print_node(root_node); }
 };
