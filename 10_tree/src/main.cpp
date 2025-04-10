@@ -51,38 +51,37 @@ class tree {
     // 来ないはずなのでErrorにしてもいいがreturnを書く
     return;
   }
-  std::tuple<bool, tree_node *> search_node(tree_node *this_node,
-                                            int64_t value) {
+  std::tuple<bool, tree_node *, tree_node *> search_node(tree_node *this_node,
+                                                         int64_t value) {
     if (this_node->value == value) {
-      return {true, nullptr};
+      return {true, this_node, nullptr};
     }
-    if (this_node == nullptr) {
-      return {false, nullptr};
+    if (this_node->left_node != nullptr) {
+      auto [left_val, left_node, left_per_node] =
+          search_node(this_node->left_node, value);
+      if (left_val == true && left_per_node == nullptr) {
+        return {left_val, left_node, this_node};
+      }
+      if (left_val == true && left_per_node != nullptr) {
+        return {left_val, left_node, left_per_node};
+      }
     }
-    if (this_node->left_node == nullptr && this_node->right_node == nullptr) {
-      return {false, nullptr};
+    if (this_node->right_node != nullptr) {
+      auto [left_val, left_node, left_per_node] =
+          search_node(this_node->left_node, value);
+      if (left_val == true && left_per_node == nullptr) {
+        return {left_val, left_node, this_node};
+      }
+      if (left_val == true && left_per_node != nullptr) {
+        return {left_val, left_node, left_per_node};
+      }
     }
-    if (this_node->value > value) {
-      return {false, this_node->left_node};
-    }
-    if (this_node->value < value) {
-      return {false, this_node->right_node};
-    }
-    throw "error";
+    return {false, nullptr, nullptr};
   }
 
-  std::tuple<bool, tree_node *> node_serch(int64_t value) {
+  std::tuple<bool, tree_node *, tree_node *> node_serch(int64_t value) {
     tree_node this_node = *root_node;
-    while (true) {
-      auto [res, next] = search_node(&this_node, value);
-      if (res == true) {
-        return {true, &this_node};
-      }
-      if (next == nullptr) {
-        return {false, nullptr};
-      }
-      this_node = *next;
-    }
+    return search_node(&this_node, value);
   }
   // ここもデバック用のプリントを残しているので最後に消す
   std::tuple<tree_node *, tree_node *> get_max_node(tree_node *target_tree) {
@@ -106,6 +105,17 @@ class tree {
     printf("%ld\n", this_node->value);
     print_node(this_node->right_node);
   }
+  void linkChildToParent(tree_node child, tree_node *node_to_delete,
+                         tree_node *parent_node) {
+    if (parent_node->left_node == node_to_delete) {
+      parent_node->left_node = &child;
+    } else if (parent_node->right_node == node_to_delete) {
+      parent_node->right_node = node_to_delete;
+    } else {
+      throw "Invalid arguments provided to attach_children_node";
+    }
+    delete node_to_delete;
+  }
 
  public:
   explicit tree(int64_t value) {
@@ -118,30 +128,43 @@ class tree {
     return res;
   }
   void delete_node(int64_t value) {
-    auto [res, target] = node_serch(value);
+    auto [res, target, target_per] = node_serch(value);
     if (res == false) {
       throw "not found";
     }
+
+    printf("target_node:%ld\n", target->value);
+    // 葉の末端を削除するケース
     if (target->left_node == nullptr && target->right_node == nullptr) {
       delete target;
     }
-    if (target->left_node != nullptr) {
-      // TODOこの辺りのケースの処理ができてないのでやる
+    // 左右両方に子供が存在するケース
+    if (target->left_node != nullptr && target->right_node != nullptr) {
+      // 左の手の中での最大値を求める
       auto [new_node, new_node_per] = get_max_node(target->left_node);
-      printf("max_node:%ld\n", new_node->value);
-      printf("max_node(check):%ld\n", new_node_per->right_node->value);
-      printf("test6\n");
+      // 左手の最大値と現在の値を入れ替える
       target->value = new_node->value;
-
-      printf("test7\n");
-      if (new_node->left_node != nullptr) {
-        new_node_per->left_node = new_node->left_node;
+      // 左手の子供自身が最大値の場合
+      if (new_node_per == nullptr) {
+        target->left_node = new_node->left_node;
+        delete new_node;
+        return;
       }
-      printf("test8\n");
+      if (new_node->left_node != nullptr) {
+        // 削除対象の左の最大nodeの左手の子を削除対象の左の最大nodeの親nodeの右手に変更する
+        new_node_per->right_node = new_node->left_node;
+      } else {
+        new_node_per->right_node = nullptr;
+      }
       delete new_node;
-      printf("test9\n");
-      new_node_per->right_node = nullptr;
-      printf("test10\n");
+    }
+    // 右側にのみ
+    if (target->right_node != nullptr) {
+      printf("right node");
+    }
+    // 左側のみあるケース
+    if (target->left_node != nullptr) {
+      printf("left node");
     }
   }
   void print_nodes() { print_node(root_node); }
