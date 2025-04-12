@@ -78,9 +78,7 @@ class tree {
   std::tuple<bool, tree_node *, tree_node **> search_node(int64_t value) {
     return search_node(root_node, value, &root_node);
   }
-  // 帰り値は　（最大値のnodeポインタ, そのnodeの親ポインタ）
-  // ただし、引数のnode自身が最大値であるときは(最大値のnodeポインタ,
-  // nullptr)を返す
+  // 帰り値は　（最大値のnodeポインタ, そのnodeを指し示すポインタ）
   std::tuple<tree_node *, tree_node **> get_max_node(
       tree_node *target_tree, tree_node **pointer_to_target_tree) {
     if (target_tree->right_node == nullptr) {
