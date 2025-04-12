@@ -110,7 +110,7 @@ class tree {
     print_node(this_node->right_node);
     printf("}");
   }
-  void deleteNodeWithZeroOrOneChild(tree_node *child, tree_node *node_to_delete,
+  void deleteNodeWithAtMostOneChild(tree_node *child, tree_node *node_to_delete,
                                     tree_node *parent_node) {
     if (parent_node->left_node == node_to_delete) {
       parent_node->left_node = child;
@@ -142,7 +142,7 @@ class tree {
     // 葉の末端を削除するケース
     if (delete_target->left_node == nullptr &&
         delete_target->right_node == nullptr) {
-      deleteNodeWithZeroOrOneChild(nullptr, delete_target,
+      deleteNodeWithAtMostOneChild(nullptr, delete_target,
                                    delete_target_parent);
       return;
     }
@@ -152,10 +152,10 @@ class tree {
       auto [new_node, new_node_per] = get_max_node(delete_target->left_node);
       delete_target->value = new_node->value;
       if (new_node->left_node != nullptr) {
-        deleteNodeWithZeroOrOneChild(new_node->left_node, new_node,
+        deleteNodeWithAtMostOneChild(new_node->left_node, new_node,
                                      new_node_per);
       }
-      deleteNodeWithZeroOrOneChild(new_node->left_node, delete_target,
+      deleteNodeWithAtMostOneChild(new_node->left_node, delete_target,
                                    delete_target_parent);
     }
     // 右側にのみ
