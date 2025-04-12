@@ -124,7 +124,7 @@ class tree {
   ~tree() { delete_node(root_node); }
   void insert(int64_t value) { insert_node(root_node, value); }
   bool serch(int64_t value) {
-    auto [res, _] = node_serch(value);
+    auto [res, _, __] = node_serch(value);
     return res;
   }
   void delete_node(int64_t value) {
