@@ -142,10 +142,10 @@ class tree {
                delete_target->right_node == nullptr) {
       deleteNodeWithAtMostOneChild(delete_target, pointer_to_delete_target);
     } else {
-      auto [left_max_node, left_max_node_parent] =
+      auto [left_max_node, pointer_to_left_max_node] =
           get_max_node(delete_target->left_node, &delete_target->left_node);
       delete_target->value = left_max_node->value;
-      deleteNodeWithAtMostOneChild(left_max_node, left_max_node_parent);
+      deleteNodeWithAtMostOneChild(left_max_node, pointer_to_left_max_node);
     }
   }
   void print_nodes() {
