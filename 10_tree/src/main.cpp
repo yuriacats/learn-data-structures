@@ -79,7 +79,7 @@ class tree {
     return {false, nullptr, nullptr};
   }
 
-  std::tuple<bool, tree_node *, tree_node *> node_serch(int64_t value) {
+  std::tuple<bool, tree_node *, tree_node *> node_search(int64_t value) {
     tree_node this_node = *root_node;
     return search_node(&this_node, value);
   }
@@ -106,7 +106,7 @@ class tree {
     print_node(this_node->right_node);
     printf("}");
   }
-  void deleteNodeWithAtMostOneChild(tree_node *child, tree_node *node_to_delete,
+  void deleteNodeWithAtMostOneChild(tree_node *node_to_delete,
                                     tree_node *parent_node) {
     if (node_to_delete == nullptr) {
       throw "nullptr has been passed to the tree_node in the function";
@@ -114,6 +114,8 @@ class tree {
     if (parent_node == nullptr) {
       throw "nullptr has been passed to the tree_node in the function";
     }
+    // gcc系の独自拡張文法。使えない場合は第二項に一項と同じ値を入れること
+    auto child = node_to_delete->left_node ?: node_to_delete->right_node;
     if (parent_node->left_node == node_to_delete) {
       parent_node->left_node = child;
     } else if (parent_node->right_node == node_to_delete) {
@@ -130,43 +132,41 @@ class tree {
   }
   ~tree() { delete_node(root_node); }
   void insert(int64_t value) { insert_node(root_node, value); }
-  bool serch(int64_t value) {
-    auto [res, _, __] = node_serch(value);
+  bool search(int64_t value) {
+    auto [res, _, __] = node_search(value);
     return res;
   }
   void delete_node(int64_t value) {
-    auto [res, delete_target, delete_target_parent] = node_serch(value);
-    if (res == false) {
+    auto [is_target_found, delete_target, delete_target_parent] =
+        node_search(value);
+    if (!is_target_found) {
       throw "not found";
     }
     // 葉の末端を削除するケース
     if (delete_target->left_node == nullptr &&
         delete_target->right_node == nullptr) {
-      deleteNodeWithAtMostOneChild(nullptr, delete_target,
-                                   delete_target_parent);
+      deleteNodeWithAtMostOneChild(delete_target, delete_target_parent);
       return;
     }
     // 左右両方に子供が存在するケース
     if (delete_target->left_node != nullptr &&
         delete_target->right_node != nullptr) {
-      auto [left_max_node, left_max_node_parente] =
+      auto [left_max_node, left_max_node_parent] =
           get_max_node(delete_target->left_node);
       delete_target->value = left_max_node->value;
-      if (left_max_node_parente == nullptr) {
-        left_max_node_parente = delete_target;
+      if (left_max_node_parent == nullptr) {
+        left_max_node_parent = delete_target;
       }
-      deleteNodeWithAtMostOneChild(left_max_node->left_node, left_max_node,
-                                   left_max_node_parente);
+      deleteNodeWithAtMostOneChild(left_max_node, left_max_node_parent);
       return;
     }
     // 右側にのみ
     if (delete_target->right_node != nullptr) {
-      deleteNodeWithAtMostOneChild(delete_target->right_node, delete_target,
-                                   delete_target_parent);
+      deleteNodeWithAtMostOneChild(delete_target, delete_target_parent);
     }
     // 左側のみあるケース
     if (delete_target->left_node != nullptr) {
-      printf("left node");
+      deleteNodeWithAtMostOneChild(delete_target, delete_target_parent);
     }
   }
   void print_nodes() {
@@ -187,18 +187,17 @@ int main() {
   my_tree.insert(5);
 
   // 探索
-  bool found = my_tree.serch(7);
+  bool found = my_tree.search(7);
   printf("7 is %s\n", found ? "found" : "not found");
-  bool found2 = my_tree.serch(5);
+  bool found2 = my_tree.search(5);
   printf("5 is %s\n", found2 ? "found" : "not found");
 
   // 削除
   my_tree.delete_node(5);
-  found = my_tree.serch(5);
+  found = my_tree.search(5);
   printf("5 is %s\n", found ? "found" : "not found");
   my_tree.print_nodes();
   my_tree.insert(5);
-  found = my_tree.serch(5);
+  found = my_tree.search(5);
   printf("5 is %s\n", found ? "found" : "not found");
-  my_tree.print_nodes();
 }
