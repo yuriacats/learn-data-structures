@@ -133,7 +133,7 @@ class tree {
     return res;
   }
   void delete_node(int64_t value) {
-    auto [res, delete_target, target_per] = node_serch(value);
+    auto [res, delete_target, delete_target_parent] = node_serch(value);
     if (res == false) {
       throw "not found";
     }
@@ -142,7 +142,7 @@ class tree {
     // 葉の末端を削除するケース
     if (delete_target->left_node == nullptr &&
         delete_target->right_node == nullptr) {
-      linkChildToParent(nullptr, delete_target, target_per);
+      linkChildToParent(nullptr, delete_target, delete_target_parent);
       return;
     }
     // 左右両方に子供が存在するケース
@@ -150,29 +150,11 @@ class tree {
         delete_target->right_node != nullptr) {
       // 左の手の中での最大値を求める
       auto [new_node, new_node_per] = get_max_node(delete_target->left_node);
-      printf("new_node:%ld\n", new_node->value);
-      printf("target:%ld\n", delete_target->value);
       // 左手の最大値と現在の値を入れ替える
       delete_target->value = new_node->value;
-      printf("new_node:%ld\n", new_node->value);
-      printf("target(changed):%ld\n", delete_target->value);
       // 左手の直接の子供が最大値の場合
-      if (new_node_per == nullptr) {
-        printf("new_node_per is null\n");
-        // 左手の最大値と現在の値を入れ替える
-        delete_target->left_node = new_node->left_node;
-        delete new_node;
-        return;
-      }
-      if (new_node->left_node != nullptr) {
-        printf("leftnode is not null");
-        // 削除対象の左の最大nodeの左手の子を削除対象の左の最大nodeの親nodeの右手に変更する
-        new_node_per->right_node = new_node->left_node;
-      } else {
-        printf("rightnode is not null");
-        new_node_per->right_node = nullptr;
-      }
-      // delete new_node;
+      linkChildToParent(new_node->left_node, delete_target,
+                        delete_target_parent);
     }
     // 右側にのみ
     if (delete_target->right_node != nullptr) {
@@ -192,25 +174,23 @@ class tree {
 
 int main() {
   tree my_tree(8);
-  my_tree.print_nodes();
   my_tree.insert(5);
   my_tree.insert(15);
   my_tree.insert(3);
   my_tree.insert(7);
   my_tree.insert(12);
   my_tree.insert(18);
-  my_tree.print_nodes();
   my_tree.insert(5);
 
   // 探索
   bool found = my_tree.serch(7);
-  printf("7 is %s\n", found ? "found" : "not found");
+  // printf("7 is %s\n", found ? "found" : "not found");
   bool found2 = my_tree.serch(5);
-  printf("5 is %s\n", found2 ? "found" : "not found");
-  my_tree.print_nodes();
+  // printf("5 is %s\n", found2 ? "found" : "not found");
 
   // 削除
   my_tree.delete_node(5);
   found = my_tree.serch(5);
-  printf("5 is %s\n", found ? "found" : "not found");
+  // printf("5 is %s\n", found ? "found" : "not found");
+  my_tree.print_nodes();
 }
