@@ -115,7 +115,7 @@ class tree {
     if (parent_node->left_node == node_to_delete) {
       parent_node->left_node = child;
     } else if (parent_node->right_node == node_to_delete) {
-      parent_node->right_node = node_to_delete;
+      parent_node->right_node = child;
     } else {
       throw "Invalid arguments provided to attach_children_node";
     }
@@ -148,11 +148,11 @@ class tree {
     // 左右両方に子供が存在するケース
     if (delete_target->left_node != nullptr &&
         delete_target->right_node != nullptr) {
-      // 左の手の中での最大値を求める
       auto [new_node, new_node_per] = get_max_node(delete_target->left_node);
-      // 左手の最大値と現在の値を入れ替える
       delete_target->value = new_node->value;
-      // 左手の直接の子供が最大値の場合
+      if (new_node->left_node != nullptr) {
+        linkChildToParent(new_node->left_node, new_node, new_node_per);
+      }
       linkChildToParent(new_node->left_node, delete_target,
                         delete_target_parent);
     }
