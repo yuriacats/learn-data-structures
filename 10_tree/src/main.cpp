@@ -67,13 +67,13 @@ class tree {
       }
     }
     if (this_node->right_node != nullptr) {
-      auto [left_val, left_node, left_per_node] =
-          search_node(this_node->left_node, value);
-      if (left_val == true && left_per_node == nullptr) {
-        return {left_val, left_node, this_node};
+      auto [right_val, right_node, right_per_node] =
+          search_node(this_node->right_node, value);
+      if (right_val == true && right_per_node == nullptr) {
+        return {right_val, right_node, this_node};
       }
-      if (left_val == true && left_per_node != nullptr) {
-        return {left_val, left_node, left_per_node};
+      if (right_val == true && right_per_node != nullptr) {
+        return {right_val, right_node, right_per_node};
       }
     }
     return {false, nullptr, nullptr};
@@ -83,16 +83,12 @@ class tree {
     tree_node this_node = *root_node;
     return search_node(&this_node, value);
   }
-  // ここもデバック用のプリントを残しているので最後に消す
   std::tuple<tree_node *, tree_node *> get_max_node(tree_node *target_tree) {
-    printf("max_node(first):%ld\n", target_tree->value);
     if (target_tree->right_node == nullptr) {
-      printf("max_node(tt):%ld\n", target_tree->value);
       return {target_tree, nullptr};
     }
     auto [res, next] = get_max_node(target_tree->right_node);
     if (res != nullptr && next == nullptr) {
-      printf("max_node(erro):%ld\n", res->value);
       return {res, target_tree};
     }
     return {res, next};
@@ -112,6 +108,12 @@ class tree {
   }
   void deleteNodeWithAtMostOneChild(tree_node *child, tree_node *node_to_delete,
                                     tree_node *parent_node) {
+    if (node_to_delete == nullptr) {
+      throw "nullptr has been passed to the tree_node in the function";
+    }
+    if (parent_node == nullptr) {
+      throw "nullptr has been passed to the tree_node in the function";
+    }
     if (parent_node->left_node == node_to_delete) {
       parent_node->left_node = child;
     } else if (parent_node->right_node == node_to_delete) {
@@ -137,8 +139,6 @@ class tree {
     if (res == false) {
       throw "not found";
     }
-
-    printf("target_node:%ld\n", delete_target->value);
     // 葉の末端を削除するケース
     if (delete_target->left_node == nullptr &&
         delete_target->right_node == nullptr) {
@@ -152,12 +152,12 @@ class tree {
       auto [left_max_node, left_max_node_parente] =
           get_max_node(delete_target->left_node);
       delete_target->value = left_max_node->value;
-      if (left_max_node->left_node != nullptr) {
-        deleteNodeWithAtMostOneChild(left_max_node->left_node, left_max_node,
-                                     left_max_node_parente);
+      if (left_max_node_parente == nullptr) {
+        left_max_node_parente = delete_target;
       }
-      deleteNodeWithAtMostOneChild(left_max_node->left_node, delete_target,
-                                   delete_target_parent);
+      deleteNodeWithAtMostOneChild(left_max_node->left_node, left_max_node,
+                                   left_max_node_parente);
+      return;
     }
     // 右側にのみ
     if (delete_target->right_node != nullptr) {
@@ -178,8 +178,8 @@ class tree {
 
 int main() {
   tree my_tree(8);
-  my_tree.insert(5);
   my_tree.insert(15);
+  my_tree.insert(5);
   my_tree.insert(3);
   my_tree.insert(7);
   my_tree.insert(12);
@@ -188,13 +188,13 @@ int main() {
 
   // 探索
   bool found = my_tree.serch(7);
-  // printf("7 is %s\n", found ? "found" : "not found");
+  printf("7 is %s\n", found ? "found" : "not found");
   bool found2 = my_tree.serch(5);
-  // printf("5 is %s\n", found2 ? "found" : "not found");
+  printf("5 is %s\n", found2 ? "found" : "not found");
 
   // 削除
   my_tree.delete_node(5);
   found = my_tree.serch(5);
-  // printf("5 is %s\n", found ? "found" : "not found");
+  printf("5 is %s\n", found ? "found" : "not found");
   my_tree.print_nodes();
 }
