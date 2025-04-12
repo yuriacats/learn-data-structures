@@ -149,19 +149,20 @@ class tree {
     // 左右両方に子供が存在するケース
     if (delete_target->left_node != nullptr &&
         delete_target->right_node != nullptr) {
-      auto [new_node, new_node_per] = get_max_node(delete_target->left_node);
-      delete_target->value = new_node->value;
-      if (new_node->left_node != nullptr) {
-        deleteNodeWithAtMostOneChild(new_node->left_node, new_node,
-                                     new_node_per);
+      auto [left_max_node, left_max_node_parente] =
+          get_max_node(delete_target->left_node);
+      delete_target->value = left_max_node->value;
+      if (left_max_node->left_node != nullptr) {
+        deleteNodeWithAtMostOneChild(left_max_node->left_node, left_max_node,
+                                     left_max_node_parente);
       }
-      deleteNodeWithAtMostOneChild(new_node->left_node, delete_target,
+      deleteNodeWithAtMostOneChild(left_max_node->left_node, delete_target,
                                    delete_target_parent);
     }
     // 右側にのみ
     if (delete_target->right_node != nullptr) {
       deleteNodeWithAtMostOneChild(delete_target->right_node, delete_target,
-                                   delete_target_parent)
+                                   delete_target_parent);
     }
     // 左側のみあるケース
     if (delete_target->left_node != nullptr) {
