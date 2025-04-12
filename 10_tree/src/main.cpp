@@ -99,16 +99,21 @@ class tree {
   }
   void print_node(tree_node *this_node) {
     if (this_node == nullptr) {
+      printf("null");
       return;
     }
+    printf("{\"value\": ");
+    printf("\"%ld\"", this_node->value);
+    printf(", \"left\": ");
     print_node(this_node->left_node);
-    printf("%ld\n", this_node->value);
+    printf(", \"right\": ");
     print_node(this_node->right_node);
+    printf("}");
   }
-  void linkChildToParent(tree_node child, tree_node *node_to_delete,
+  void linkChildToParent(tree_node *child, tree_node *node_to_delete,
                          tree_node *parent_node) {
     if (parent_node->left_node == node_to_delete) {
-      parent_node->left_node = &child;
+      parent_node->left_node = child;
     } else if (parent_node->right_node == node_to_delete) {
       parent_node->right_node = node_to_delete;
     } else {
@@ -136,27 +141,37 @@ class tree {
     printf("target_node:%ld\n", target->value);
     // 葉の末端を削除するケース
     if (target->left_node == nullptr && target->right_node == nullptr) {
-      delete target;
+      linkChildToParent(nullptr, target, target_per);
+
+      return;
     }
     // 左右両方に子供が存在するケース
     if (target->left_node != nullptr && target->right_node != nullptr) {
       // 左の手の中での最大値を求める
       auto [new_node, new_node_per] = get_max_node(target->left_node);
+      printf("new_node:%ld\n", new_node->value);
+      printf("target:%ld\n", target->value);
       // 左手の最大値と現在の値を入れ替える
       target->value = new_node->value;
-      // 左手の子供自身が最大値の場合
+      printf("new_node:%ld\n", new_node->value);
+      printf("target(changed):%ld\n", target->value);
+      // 左手の直接の子供が最大値の場合
       if (new_node_per == nullptr) {
+        printf("new_node_per is null");
+        // 左手の最大値と現在の値を入れ替える
         target->left_node = new_node->left_node;
         delete new_node;
         return;
       }
       if (new_node->left_node != nullptr) {
+        printf("leftnode is not null");
         // 削除対象の左の最大nodeの左手の子を削除対象の左の最大nodeの親nodeの右手に変更する
         new_node_per->right_node = new_node->left_node;
       } else {
+        printf("rightnode is not null");
         new_node_per->right_node = nullptr;
       }
-      delete new_node;
+      // delete new_node;
     }
     // 右側にのみ
     if (target->right_node != nullptr) {
@@ -167,7 +182,11 @@ class tree {
       printf("left node");
     }
   }
-  void print_nodes() { print_node(root_node); }
+  void print_nodes() {
+    printf("'");
+    print_node(root_node);
+    printf("'\n");
+  }
 };
 
 int main() {
@@ -179,12 +198,15 @@ int main() {
   my_tree.insert(7);
   my_tree.insert(12);
   my_tree.insert(18);
+  my_tree.print_nodes();
+  my_tree.insert(5);
 
   // 探索
   bool found = my_tree.serch(7);
   printf("7 is %s\n", found ? "found" : "not found");
   bool found2 = my_tree.serch(5);
   printf("5 is %s\n", found2 ? "found" : "not found");
+  my_tree.print_nodes();
 
   // 削除
   my_tree.delete_node(5);
