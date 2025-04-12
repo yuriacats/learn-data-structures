@@ -197,4 +197,8 @@ int main() {
   found = my_tree.serch(5);
   printf("5 is %s\n", found ? "found" : "not found");
   my_tree.print_nodes();
+  my_tree.insert(5);
+  found = my_tree.serch(5);
+  printf("5 is %s\n", found ? "found" : "not found");
+  my_tree.print_nodes();
 }
