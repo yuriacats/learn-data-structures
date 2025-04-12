@@ -160,7 +160,8 @@ class tree {
     }
     // 右側にのみ
     if (delete_target->right_node != nullptr) {
-      printf("right node");
+      deleteNodeWithAtMostOneChild(delete_target->right_node, delete_target,
+                                   delete_target_parent)
     }
     // 左側のみあるケース
     if (delete_target->left_node != nullptr) {
