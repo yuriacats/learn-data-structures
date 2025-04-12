@@ -133,33 +133,34 @@ class tree {
     return res;
   }
   void delete_node(int64_t value) {
-    auto [res, target, target_per] = node_serch(value);
+    auto [res, delete_target, target_per] = node_serch(value);
     if (res == false) {
       throw "not found";
     }
 
-    printf("target_node:%ld\n", target->value);
+    printf("target_node:%ld\n", delete_target->value);
     // 葉の末端を削除するケース
-    if (target->left_node == nullptr && target->right_node == nullptr) {
-      linkChildToParent(nullptr, target, target_per);
-
+    if (delete_target->left_node == nullptr &&
+        delete_target->right_node == nullptr) {
+      linkChildToParent(nullptr, delete_target, target_per);
       return;
     }
     // 左右両方に子供が存在するケース
-    if (target->left_node != nullptr && target->right_node != nullptr) {
+    if (delete_target->left_node != nullptr &&
+        delete_target->right_node != nullptr) {
       // 左の手の中での最大値を求める
-      auto [new_node, new_node_per] = get_max_node(target->left_node);
+      auto [new_node, new_node_per] = get_max_node(delete_target->left_node);
       printf("new_node:%ld\n", new_node->value);
-      printf("target:%ld\n", target->value);
+      printf("target:%ld\n", delete_target->value);
       // 左手の最大値と現在の値を入れ替える
-      target->value = new_node->value;
+      delete_target->value = new_node->value;
       printf("new_node:%ld\n", new_node->value);
-      printf("target(changed):%ld\n", target->value);
+      printf("target(changed):%ld\n", delete_target->value);
       // 左手の直接の子供が最大値の場合
       if (new_node_per == nullptr) {
-        printf("new_node_per is null");
+        printf("new_node_per is null\n");
         // 左手の最大値と現在の値を入れ替える
-        target->left_node = new_node->left_node;
+        delete_target->left_node = new_node->left_node;
         delete new_node;
         return;
       }
@@ -174,11 +175,11 @@ class tree {
       // delete new_node;
     }
     // 右側にのみ
-    if (target->right_node != nullptr) {
+    if (delete_target->right_node != nullptr) {
       printf("right node");
     }
     // 左側のみあるケース
-    if (target->left_node != nullptr) {
+    if (delete_target->left_node != nullptr) {
       printf("left node");
     }
   }
