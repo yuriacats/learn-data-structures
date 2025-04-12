@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 #include <cstdio>
-#include <tuple>
 #define DEFAULT_N 100
 
 struct tree_node {
@@ -51,40 +50,33 @@ class tree {
     // 来ないはずなのでErrorにしてもいいがreturnを書く
     return;
   }
-  // 返り値は（見つかったか, 見つかった対象のnodeのポインタ,
-  // 見つかった対象を指し示しているポインタ
-  std::tuple<bool, tree_node *, tree_node **> search_node(
-      tree_node *this_node, int64_t value, tree_node **pointer_to_this_node) {
+  // 帰り値は見つかった対象を指し示しているポインタへのポインタ
+  // 見つからなかった場合はnullptr
+  tree_node **search_node(int64_t value, tree_node **pointer_to_this_node) {
+    tree_node *this_node = *pointer_to_this_node;
     if (this_node->value == value) {
-      return {true, this_node, pointer_to_this_node};
+      return pointer_to_this_node;
     }
-    if (this_node->left_node != nullptr) {
-      auto [found_in_left_tree, left_node, pointer_to_found_node] =
-          search_node(this_node->left_node, value, &this_node->left_node);
-      if (found_in_left_tree) {
-        return {found_in_left_tree, left_node, pointer_to_found_node};
-      }
+    tree_node **tree_to_search = value < this_node->value
+                                     ? &this_node->left_node
+                                     : &this_node->right_node;
+    if (!tree_to_search) {
+      return nullptr;
     }
-    if (this_node->right_node != nullptr) {
-      auto [found_in_right_tree, right_node, pointer_to_found_node] =
-          search_node(this_node->right_node, value, &this_node->right_node);
-      if (found_in_right_tree) {
-        return {found_in_right_tree, right_node, pointer_to_found_node};
-      }
-    }
-    return {false, nullptr, nullptr};
+    return search_node(value, tree_to_search);
   }
 
-  std::tuple<bool, tree_node *, tree_node **> search_node(int64_t value) {
-    return search_node(root_node, value, &root_node);
+  // 帰り値は見つかった対象を指し示しているポインタへのポインタ
+  // 見つからなかった場合はnullptr
+  tree_node **search_node(int64_t value) {
+    return search_node(value, &root_node);
   }
-  // 帰り値は　（最大値のnodeポインタ, そのnodeを指し示すポインタ）
-  std::tuple<tree_node *, tree_node **> get_max_node(
-      tree_node *target_tree, tree_node **pointer_to_target_tree) {
+  tree_node **get_max_node(tree_node **pointer_to_target_tree) {
+    tree_node *target_tree = *pointer_to_target_tree;
     if (target_tree->right_node == nullptr) {
-      return {target_tree, pointer_to_target_tree};
+      return pointer_to_target_tree;
     }
-    return get_max_node(target_tree->right_node, &(target_tree->right_node));
+    return get_max_node(&target_tree->right_node);
   }
   void print_node(tree_node *this_node) {
     if (this_node == nullptr) {
@@ -99,11 +91,8 @@ class tree {
     print_node(this_node->right_node);
     printf("}");
   }
-  void deleteNodeWithAtMostOneChild(tree_node *node_to_delete,
-                                    tree_node **pointer_to_node_to_delete) {
-    if (node_to_delete == nullptr) {
-      throw "nullptr has been passed to the tree_node in the function";
-    }
+  void deleteNodeWithAtMostOneChild(tree_node **pointer_to_node_to_delete) {
+    auto node_to_delete = *pointer_to_node_to_delete;
     if (pointer_to_node_to_delete == nullptr) {
       throw "nullptr has been passed to the tree_node in the function";
     }
@@ -120,30 +109,23 @@ class tree {
   ~tree() { delete_tree(root_node); }
   void insert(int64_t value) { insert_node(root_node, value); }
   bool search(int64_t value) {
-    auto [found, _, __] = search_node(value);
+    auto found = search_node(value);
     return found;
   }
   void delete_node(int64_t value) {
-    auto [is_target_found, delete_target, pointer_to_delete_target] =
-        search_node(value);
-    if (!is_target_found) {
+    auto pointer_to_delete_target = search_node(value);
+    if (!pointer_to_delete_target) {
       throw "not found";
     }
+    auto delete_target = *pointer_to_delete_target;
     // 葉の末端を削除するケース
-    if (delete_target->left_node == nullptr &&
+    if (delete_target->left_node == nullptr ||
         delete_target->right_node == nullptr) {
-      deleteNodeWithAtMostOneChild(delete_target, pointer_to_delete_target);
-    } else if (delete_target->left_node == nullptr &&
-               delete_target->right_node != nullptr) {
-      deleteNodeWithAtMostOneChild(delete_target, pointer_to_delete_target);
-    } else if (delete_target->left_node != nullptr &&
-               delete_target->right_node == nullptr) {
-      deleteNodeWithAtMostOneChild(delete_target, pointer_to_delete_target);
+      deleteNodeWithAtMostOneChild(pointer_to_delete_target);
     } else {
-      auto [left_max_node, pointer_to_left_max_node] =
-          get_max_node(delete_target->left_node, &delete_target->left_node);
-      delete_target->value = left_max_node->value;
-      deleteNodeWithAtMostOneChild(left_max_node, pointer_to_left_max_node);
+      auto pointer_to_left_max_node = get_max_node(&delete_target->left_node);
+      delete_target->value = (*pointer_to_left_max_node)->value;
+      deleteNodeWithAtMostOneChild(pointer_to_left_max_node);
     }
   }
   void print_nodes() {
